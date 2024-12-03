@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
     if (pid < 0) error("ERROR in new process creation");
 
     if (pid == 0) {
+      FILE *f = fopen("index.html", "r");
+      int byte_read;
       close(sockfd);
       
       // do whatever you want
@@ -54,9 +56,11 @@ int main(int argc, char *argv[])
       printf("Here is the message:\n%s\n", buffer);
 
       // mengirim balasan
-      buf_size = write(newsockfd, "I got your message", 18);
-      if (buf_size < 0) error("ERROR writing to socket");
+      while ((byte_read = fread(buffer, 1, sizeof(buffer), f)) > 0) {
+        if (write(newsockfd, buffer, byte_read) < 0) error("ERROR writing to socket");
+      }
       close(newsockfd);
+      fclose(f);
       exit(1);
     } else {
       close(newsockfd);
