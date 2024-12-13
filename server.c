@@ -14,29 +14,33 @@
 #define MAX_USERS 10
 
 
-typedef struct User {
-    char username[51];
-    char message[101];
-} User;
-
 void error(const char *msg) {
     perror(msg);
     exit(1);
 }
 
-void handle_client(int cli_sock, char *buffer) {
-    // char buffer[BUFFER_SIZE];
+void send_broadcast(char *broadcast_msg, int *client_fds)
+{
+    for (int i=0; i < MAX_USERS; i++) {
+        if (client_fds[i] != 0) {
+            write(client_fds[i], broadcast_msg, strlen(broadcast_msg));
+        }
+    }
+}
+
+void handle_client(int sending_cli_sock, char *buffer, int *client_fds) {
     int read_size;
     FILE *f = fopen("client.html", "r");
+
 
     // Kirim file HTML ke klien
     if (f == NULL) {
         error("ERROR opening file");
     }
-    printf("Request:\n%s", buffer);
+    // printf("Request:\n%s", buffer);
     if (strncmp(buffer, "GET /", 5) == 0) {
         while ((read_size = fread(buffer, 1, sizeof(buffer), f)) > 0) {
-            if (write(cli_sock, buffer, read_size) < 0) {
+            if (write(sending_cli_sock, buffer, read_size) < 0) {
                 error("ERROR writing to socket");
             }
         }
@@ -51,24 +55,37 @@ void handle_client(int cli_sock, char *buffer) {
                 printf("\n%s joined\n", username);
 
                 // Kirim balasan ke klien
-                sprintf(buffer, "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nConnection: keep-alive\r\n\r\nSelamat datang, %s!\n", username);
-                write(cli_sock, buffer, strlen(buffer));
+                sprintf(buffer, \
+                        "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nConnection: keep-alive\r\n\r\nSelamat datang, %s!\n", username);
+                write(sending_cli_sock, buffer, strlen(buffer));
             } else {
                 char *message = (char *) malloc(sizeof(char) * 100);
                 char inputted_username[50];
                 int n = sscanf(username, "%[^;];message:%[^;];", inputted_username, message);
                 printf("\n%s: %s\n", inputted_username, message);
-                sprintf(buffer, "HTTP/1.1 200 OK\r\nContent-type: text/plain\r\nConnection: keep-alive\r\n\r\n%s: %s\n", inputted_username, message);
-                write(cli_sock, buffer, strlen(buffer));
-                // TODO: BROADCAST
+                sprintf(buffer, \
+                        "HTTP/1.1 200 OK\r\n"
+                        "Content-type: text/plain\r\n"
+                        "Connection: keep-alive\r\n"
+                        "\r\n"
+                        "Server: I got your message, %s. Here it is: %s\n", \
+                        inputted_username, message);
+                printf("buffer:\n%s", buffer);
+                write(sending_cli_sock, buffer, strlen(buffer));
+                // send_broadcast(buffer, client_fds);
             }
         } else {
-            sprintf(buffer, "HTTP/1.1 400 Bad Request\r\nContent-type: text/plain\r\nConnection: close\r\n\r\nUsername tidak ditemukan.\n");
-            write(cli_sock, buffer, strlen(buffer));
+            sprintf(buffer, \
+                    "HTTP/1.1 400 Bad Request\r\n"
+                    "Content-type: text/plain\r\n"
+                    "Connection: close\r\n"
+                    "\r\n"
+                    "Username tidak ditemukan.\n");
+            write(sending_cli_sock, buffer, strlen(buffer));
         }
     } else {
         sprintf(buffer, "HTTP/1.1 400 Bad Request\r\nContent-type: text/plain\r\nConnection: close\r\n\r\nHanya mendukung permintaan POST.\n");
-        write(cli_sock, buffer, strlen(buffer));
+        write(sending_cli_sock, buffer, strlen(buffer));
     }
     return;
 }
@@ -78,10 +95,18 @@ int main(int argc, char *argv[]) {
     int bytes_read, client_count;
     socklen_t cli_len;
     char buffer[BUFFER_SIZE];
-    User users[MAX_USERS];
+    int client_fds[MAX_USERS];
     struct sockaddr_in serv_addr, cli_addr;
 
+    // inisialisasi file descriptor client
+    for (int i; i < MAX_USERS; i++) {
+        client_fds[i] = 0;
+    }
+
+    // inisialisasi socket
     server_sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    // pengaturan address reusing
     if (setsockopt(server_sock, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0)
         error("setsockopt(SO_REUSEADDR) failed");
     if (server_sock < 0) error("ERROR opening socket");
@@ -101,11 +126,22 @@ int main(int argc, char *argv[]) {
         client_sock = accept(server_sock, (struct sockaddr *)&cli_addr, &cli_len);
         if (client_sock < 0) error("ERROR on accept");
 
+        // Mengecek apakah file descriptor sudah ada
+        for (int i = 0; i < MAX_USERS; i++) {
+            printf("Client fds ke-%d: %d\n", i+1, client_fds[i]);
+            if (client_fds[i] == 0) {
+                client_fds[i] = client_sock;
+                break;
+            } else if (client_fds[i] == client_sock) {
+                break;
+            }
+        }
         if (fork() == 0) {
             close(server_sock); // Proses anak tidak perlu socket server
             bytes_read = read(client_sock, buffer, sizeof(buffer));
             if (bytes_read < 0) error("ERROR on reading.");
-            handle_client(client_sock, buffer);
+            printf("Request:\n%s", buffer);
+            handle_client(client_sock, buffer, client_fds);
             return 0; // Keluar dari proses anak setelah selesai
         }
         close(client_sock); // Proses induk menutup socket klien
