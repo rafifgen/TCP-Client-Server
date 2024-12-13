@@ -1,0 +1,77 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+Connection: Keep-Alive
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chat</title>
+</head>
+
+<body>
+    <h1>Contoh IPC dengan WebSocket</h1>
+    <input type="text" id="username" placeholder="Masukkan username">
+    <button onclick="connect()">Hubungkan</button>
+    <br>
+    <input type="text" id="messageInput" placeholder="Masukkan pesan">
+    <button onclick="sendMessage()">Kirim</button>
+    <pre id="output"></pre>
+
+    <script>
+        let currrentUsername;
+        const output = document.querySelector("pre#output");
+
+        async function connect() {
+            const usrnameInp = document.querySelector("input#username");
+            const username = usrnameInp.value;
+            usrnameInp.value = "";
+            currrentUsername = username;
+            try {
+                const url = "http://localhost:8080"
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: `username:${username}`
+                })
+
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+                const message = await response.text();
+                console.log(message);
+                output.textContent += message + "\n";
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        async function sendMessage() {
+            const msgInput = document.querySelector("input#messageInput");
+            const message = msgInput.value;
+            msgInput.value = "";
+
+            if (currrentUsername) {
+                try {
+                    const url = "http://localhost:8080"
+                    const response = await fetch(url, {
+                        method: "POST",
+                        body: `username:${currrentUsername};message:${message};`
+                    })
+
+                    if (!response.ok) {
+                        throw new Error(`Response status: ${response.status}`);
+                    }
+                    const responseMessage = await response.text();
+                    console.log(responseMessage);
+                    output.textContent += responseMessage + "\n";
+                } catch (error) {
+                    console.error(error.message);
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
