@@ -7,164 +7,99 @@ Connection: Keep-Alive
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Chat dengan Fetch API</title>
-
     <style>
         .notification {
-
             color: #666;
-
             font-style: italic;
-
             margin: 5px 0;
-
         }
 
         .message {
-
             margin: 5px 0;
-
         }
 
         #output {
-
             height: 400px;
-
             overflow-y: auto;
-
             border: 1px solid #ccc;
-
             padding: 10px;
-
             margin: 10px 0;
-
             background: #f9f9f9;
-
         }
 
         .system-message {
-
             color: #007bff;
-
             font-style: italic;
-
         }
 
         #activeUsers {
-
             margin: 10px 0;
-
             padding: 10px;
-
             background: #eef;
-
             border-radius: 4px;
-
         }
 
         .header {
-
             display: flex;
-
             justify-content: space-between;
-
             align-items: center;
-
             margin-bottom: 20px;
-
         }
 
         .btn-logout {
-
             background-color: #dc3545;
-
             color: white;
-
             border: none;
-
             padding: 8px 15px;
-
             border-radius: 4px;
-
             cursor: pointer;
-
         }
 
         .btn-logout:hover {
-
             background-color: #c82333;
-
         }
 
         .btn-send {
-
             background-color: #28a745;
-
             color: white;
-
             border: none;
-
             padding: 8px 15px;
-
             border-radius: 4px;
-
             cursor: pointer;
-
         }
 
         .btn-send:hover {
-
             background-color: #218838;
-
         }
 
         .btn-login {
-
             background-color: #007bff;
-
             color: white;
-
             border: none;
-
             padding: 8px 15px;
-
             border-radius: 4px;
-
             cursor: pointer;
-
         }
 
         .btn-login:hover {
-
             background-color: #0056b3;
-
         }
 
         .input-group {
-
             margin: 10px 0;
-
             display: flex;
 
             gap: 10px;
-
         }
 
         input[type="text"] {
-
             padding: 8px;
-
             border: 1px solid #ddd;
-
             border-radius: 4px;
-
             flex-grow: 1;
-
         }
     </style>
 
@@ -173,217 +108,106 @@ Connection: Keep-Alive
 <body>
 
     <h1>Contoh Chat dengan Fetch API</h1>
-
     <!-- Form untuk username -->
-
     <div id="loginForm">
-
         <div class="input-group">
-
             <input type="text" id="usernameInput" placeholder="Masukkan username">
-
             <button class="btn-login" onclick="setUsername()">Masuk</button>
-
         </div>
-
     </div>
-
-
 
     <!-- Area chat yang awalnya tersembunyi -->
 
     <div id="chatArea" style="display: none;">
-
         <div class="header">
-
             <p>Selamat datang, <span id="userLabel"></span>!</p>
-
             <button class="btn-logout" onclick="logout()">Keluar</button>
-
         </div>
-
-
-
         <div id="activeUsers">
-
             <strong>Users Online:</strong> <span id="userList"></span>
-
         </div>
-
         <div id="output"></div>
-
         <div class="input-group">
-
             <input type="text" id="messageInput" placeholder="Masukkan pesan">
-
             <button class="btn-send" onclick="sendMessage()">Kirim</button>
-
         </div>
-
     </div>
-
-
 
     <script>
 
         let currentUsername;
-
         const output = document.getElementById('output');
 
-
-
         async function setUsername() {
-
             const usernameInput = document.getElementById('usernameInput');
-
             const username = usernameInput.value.trim();
 
-
-
             if (username) {
-
                 currentUsername = username;
-
                 try {
-
                     const url = "http://localhost:8080";
-
                     const response = await fetch(url, {
-
                         method: "POST",
-
                         body: `username:${username}`
-
                     });
-
-
-
                     if (!response.ok) {
-
                         throw new Error(`Response status: ${response.status}`);
-
                     }
-
-
 
                     const message = await response.text();
-
                     appendMessage(`Server: ${message}`, 'system-message');
-
-
-
                     document.getElementById('loginForm').style.display = 'none';
-
                     document.getElementById('chatArea').style.display = 'block';
-
                     document.getElementById('userLabel').textContent = username;
-
-
-
                 } catch (error) {
-
                     alert(`Gagal menghubungkan: ${error.message}`);
-
                 }
-
             } else {
-
                 alert('Username tidak boleh kosong!');
-
             }
-
         }
-
-
-
         async function sendMessage() {
-
             const messageInput = document.getElementById('messageInput');
-
             const message = messageInput.value.trim();
-
-
-
             if (message && currentUsername) {
-
                 try {
-
                     const url = "http://localhost:8080";
-
                     const response = await fetch(url, {
-
                         method: "POST",
-
                         body: `username:${currentUsername};message:${message};`
-
                     });
 
-
-
                     if (!response.ok) {
-
                         throw new Error(`Response status: ${response.status}`);
-
                     }
-
-
-
                     const responseMessage = await response.text();
-
                     appendMessage(`Server: ${responseMessage}`, 'system-message');
-
                     messageInput.value = '';
-
-
-
                 } catch (error) {
-
                     alert(`Gagal mengirim pesan: ${error.message}`);
-
                 }
 
             } else {
-
                 alert('Pesan tidak boleh kosong!');
-
             }
-
         }
-
-
 
         function logout() {
-
             currentUsername = null;
-
             document.getElementById('loginForm').style.display = 'block';
-
             document.getElementById('chatArea').style.display = 'none';
-
             document.getElementById('output').innerHTML = '';
-
             document.getElementById('usernameInput').value = '';
-
         }
-
-
 
         function appendMessage(message, type = 'message') {
-
             const messageDiv = document.createElement('div');
-
             messageDiv.className = type;
-
             messageDiv.textContent = message;
-
             output.appendChild(messageDiv);
-
             output.scrollTop = output.scrollHeight;
-
         }
-
     </script>
-
 </body>
 
 </html>
