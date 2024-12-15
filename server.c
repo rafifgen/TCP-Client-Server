@@ -45,7 +45,7 @@ char pembayaran_answers[3][1500] = { \
     "Maks. pembelian Rp500.000/pesanan untuk layanan pengiriman Instant.\n\n"
     \
     "Untuk metode pembayaran COD (Bayar di Tempat), tidak ada biaya yang dikenakan\n"
-    "ke Penjual. Biaya penanganan yang berlaku untuk seluruh Pengguna Shopee\n"
+    "ke Penjual. Biaya penanganan yang berlaku untuk seluruh Pengguna Snowee\n"
     "dengan ketentuan berikut:\n\n"
     \
     "1. Untuk pesanan COD (Bayar di Tempat) pertama s/d ke-3 kali akan dikenakan\n"
@@ -66,13 +66,13 @@ char pembayaran_answers[3][1500] = { \
     "waktu yang telah ditentukan untuk menyelesaikan pesanan Anda. Batas waktu ini\n"
     "tergantung pada metode pembayaran yang Anda pilih:\n\n"
     \
-    "- ShopeePay dan SPayLater: 1 (satu) jam setelah checkout.\n"
+    "- SnoweePay dan SPayLater: 1 (satu) jam setelah checkout.\n"
     "- Kartu kredit, debit online/kartu kredit, dan OneKlik: 3 (tiga) jam setelah checkout.\n"
     "- Virtual Account, Indomaret, dan Alfamart: 1x24 jam setelah checkout.",
     \
     /* PESAN KETIGA PEMBAYARAN */
     "Anda dapat mengubah metode pembayaran kapan saja sebelum pembayaran berhasil\n"
-    "diproses oleh Shopee.\n\n"
+    "diproses oleh Snowee.\n\n"
     \
     "Pembayaran yang belum diselesaikan dapat ditemukan di halaman Pembelian Saya.\n"
     "Untuk mengubah metode pembayaran, buka halaman Saya > Belum Bayar > Ubah Metode\n"
@@ -94,7 +94,7 @@ char pesanan_answers[3][1500] = {
     "mengajukan pembatalan lagi untuk pesanan yang sama.\n\n"
 
     "Pembatalan memiliki ketentuan yang berbeda-beda sesuai dengan jenis pembatalan\n"
-    "yang dipilih. Pelajari lebih lanjut tentang jenis-jenis pembatalan pesanan di Shopee.\n\n"
+    "yang dipilih. Pelajari lebih lanjut tentang jenis-jenis pembatalan pesanan di Snowee.\n\n"
 
     "Untuk memeriksa status pengajuan pembatalan Anda, pilih Pesanan Saya > pilih\n"
     "Tampilkan Rincian Pembatalan pada pesanan.\n\n"
@@ -106,9 +106,9 @@ char pesanan_answers[3][1500] = {
     "sesuai dengan metode pembayaran yang digunakan. Waktu proses pengembalian\n"
     "dana berbeda-beda untuk setiap metode pembayaran.\n\n"
 
-    "Anda akan menerima notifikasi melalui aplikasi Shopee dan email setelah\n"
+    "Anda akan menerima notifikasi melalui aplikasi Snowee dan email setelah\n"
     "pengembalian Anda diproses. Untuk melihat status pengembalian, pilih Status\n"
-    "Pesanan melalui tab Notifikasi di aplikasi Shopee.",
+    "Pesanan melalui tab Notifikasi di aplikasi Snowee.",
 
     /* JAWABAN KETIGA PESANAN */
     "Anda dapat menggunakan jasa kirim Ambil di Tempat dengan cara memilih Ambil\n"
@@ -123,37 +123,37 @@ char pesanan_answers[3][1500] = {
     "    yang dapat dihubungi sudah diatur dengan benar, lalu pilih Konfirmasi.\n\n"
 
     "Untuk melanjutkan pesanan, Anda dapat menggunakan Voucher yang dimiliki dengan\n"
-    "pilih Voucher Shopee > pilih Metode Pembayaran > pilih Buat Pesanan."
+    "pilih Voucher Snowee > pilih Metode Pembayaran > pilih Buat Pesanan."
 };
 
 char dana_answers[3][1500] = {
     /* JAWABAN PERTAMA DANA */
     "Apabila produk rusak dalam pengiriman, Pembeli dapat mengajukan pengembalian\n"
-    "barang/dana melalui aplikasi Shopee dengan menyertakan bukti yang dibutuhkan\n"
+    "barang/dana melalui aplikasi Snowee dengan menyertakan bukti yang dibutuhkan\n"
     "untuk keperluan peninjauan ke pihak jasa kirim. Penyerahan bukti dilakukan melalui\n"
-    "aplikasi Shopee dan Pembeli harus melampirkannya sesuai dengan kriteria wajib atau opsional.\n\n"
+    "aplikasi Snowee dan Pembeli harus melampirkannya sesuai dengan kriteria wajib atau opsional.\n\n"
 
     "Keputusan yang diberikan didasarkan pada analisis dan bukti peninjauan yang\n"
-    "dilakukan oleh pihak jasa kirim. Shopee memiliki kewenangan yang tidak terbatas\n"
+    "dilakukan oleh pihak jasa kirim. Snowee memiliki kewenangan yang tidak terbatas\n"
     "dalam menentukan langkah selanjutnya serta pihak yang harus menanggung ongkos kirim\n"
     "pengembalian barang jika diperlukan.\n\n"
 
-    "Keputusan yang dibuat oleh Shopee tidak dapat diganggu gugat.",
+    "Keputusan yang dibuat oleh Snowee tidak dapat diganggu gugat.",
 
     /* JAWABAN KEDUA DANA */
     "Pengembalian dana untuk pesanan yang berhasil dibatalkan akan segera diproses sesuai dengan\n"
     "metode pembayaran yang digunakan. Waktu proses pengembalian dana berbeda-beda untuk setiap metode pembayaran.\n\n"
 
-    "Anda akan menerima notifikasi melalui aplikasi Shopee dan email setelah pengembalian Anda diproses.\n"
-    "Untuk melihat status pengembalian, pilih Status Pesanan melalui tab Notifikasi di aplikasi Shopee.",
+    "Anda akan menerima notifikasi melalui aplikasi Snowee dan email setelah pengembalian Anda diproses.\n"
+    "Untuk melihat status pengembalian, pilih Status Pesanan melalui tab Notifikasi di aplikasi Snowee.",
 
     /* JAWABAN KETIGA DANA */
     "Anda dapat melacak pengembalian paket dengan no. resi yang diberikan setelah Anda mengajukan\n"
     "pengembalian barang/dana, atau mengatur sendiri pengiriman dengan jasa kirim pilihan Anda.\n\n"
 
     "Silakan lacak barang melalui:\n"
-    "- Aplikasi Shopee untuk pembelian produk dari toko Shopee Mall.\n"
-    "- Situs masing-masing jasa kirim untuk pembelian produk dari toko non-Shopee Mall\n"
+    "- Aplikasi Snowee untuk pembelian produk dari toko Snowee Mall.\n"
+    "- Situs masing-masing jasa kirim untuk pembelian produk dari toko non-Snowee Mall\n"
     "  dengan memasukkan no. resi."
 };
 
@@ -400,7 +400,7 @@ int main() {
             bytes_read = read(client_sock, buffer, sizeof(buffer));
             if (bytes_read < 0)
                 error("ERROR on reading.");
-            // printf("Request:\n%s", buffer); // line ini dapat di-uncomment untuk melakukan pengecekan request yang diterima
+            printf("Request:\n%s", buffer); // line ini dapat di-uncomment untuk melakukan pengecekan request yang diterima
             handle_client(client_sock, buffer);
             exit(0); // Keluar dari proses anak setelah selesai
         }
