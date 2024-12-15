@@ -10,6 +10,10 @@ Connection: Keep-Alive
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat dengan Fetch API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
     <style>
         .notification {
             color: #666;
@@ -101,13 +105,21 @@ Connection: Keep-Alive
             border-radius: 4px;
             flex-grow: 1;
         }
+
+        pre {
+            font-family: "Open Sans", sans-serif;
+        }
+
+        .user-choice {
+            text-align: right;
+        }
     </style>
 
 </head>
 
 <body>
 
-    <h1>Contoh Chat dengan Fetch API</h1>
+    <h1>Help Chat</h1>
     <!-- Form untuk username -->
     <div id="loginForm">
         <div class="input-group">
@@ -123,12 +135,9 @@ Connection: Keep-Alive
             <p>Selamat datang, <span id="userLabel"></span>!</p>
             <button class="btn-logout" onclick="logout()">Keluar</button>
         </div>
-        <div id="activeUsers">
-            <strong>Users Online:</strong> <span id="userList"></span>
-        </div>
         <div id="output"></div>
         <div class="input-group">
-            <input type="text" id="messageInput" placeholder="Masukkan pesan">
+            <input type="text" id="messageInput" placeholder="Masukkan angka">
             <button class="btn-send" onclick="sendMessage()">Kirim</button>
         </div>
     </div>
@@ -136,6 +145,26 @@ Connection: Keep-Alive
     <script>
 
         let currentUsername;
+        let finish = false;
+        let category = 0, question = 0;
+        const questions = [
+            [
+                "Apa itu Metode Pembayaran COD (Bayar di Tempat)?",
+                "Apa yang terjadi jika saya tidak membayar pesanan\n" +
+                "setelah batas waktu pembayaran berakhir?",
+                "Apakah saya dapat mengubah metode pembayaran saya?"
+            ],
+            [
+                "Apakah saya dapat membatalkan pesanan saya?",
+                "Bagaimana proses pengembalian dana untuk pesanan yang dibatalkan?",
+                "Bagaimana cara membuat pesanan dengan jasa kirim Ambil di Tempat? "
+            ],
+            [
+                "Siapa yang bertanggung jawab atas kerusakan barang yang terjadi saat pengiriman?",
+                "Bagaimana proses pengembalian dana untuk pesanan yang dibatalkan?",
+                "Bagaimana cara melacak lokasi barang yang dikembalikan ke Penjual?"
+            ]
+        ]
         const output = document.getElementById('output');
 
         async function setUsername() {
@@ -155,7 +184,7 @@ Connection: Keep-Alive
                     }
 
                     const message = await response.text();
-                    appendMessage(`Server: ${message}`, 'system-message');
+                    appendMessage(message, 'message');
                     document.getElementById('loginForm').style.display = 'none';
                     document.getElementById('chatArea').style.display = 'block';
                     document.getElementById('userLabel').textContent = username;
@@ -166,34 +195,109 @@ Connection: Keep-Alive
                 alert('Username tidak boleh kosong!');
             }
         }
+
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            if (message && currentUsername) {
+            const message = Number(messageInput.value.trim());
+            const url = "http://localhost:8080";
+            if (message && !finish) {
+                if (message != 1 && message != 2 && message != 3) {
+                    alert("Masukkan hanya angka 1, 2, atau 3.");
+                    messageInput.value = '';
+                    return;
+                }
+                if (category == 0) {
+                    let userReply;
+                    if (message == 1) {
+                        userReply = 'Pembayaran';
+                    } else if (message == 2) {
+                        userReply = 'Pesanan dan Pengiriman';
+                    } else {
+                        userReply = 'Pengembalian Dana';
+                    }
+                    category = message;
+                    appendMessage(userReply, 'user-choice');
+                } else {
+                    question = message;
+                    let userReply = questions[category - 1][question - 1];
+                    appendMessage(userReply, 'user-choice');
+                }
                 try {
-                    const url = "http://localhost:8080";
                     const response = await fetch(url, {
                         method: "POST",
-                        body: `username:${currentUsername};message:${message};`
+                        body: `username:${currentUsername};cat:${category};ques:${question};`
                     });
 
                     if (!response.ok) {
                         throw new Error(`Response status: ${response.status}`);
                     }
                     const responseMessage = await response.text();
-                    appendMessage(`Server: ${responseMessage}`, 'system-message');
+                    appendMessage(responseMessage, 'message');
                     messageInput.value = '';
+                    if (question != 0) {
+                        category = 0;
+                        question = 0;
+                        finish = true;
+                        const satisfiedMessage =
+                            "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
+                            "1. Ya, saya ingin kembali ke menu awal\n" +
+                            "2. Tidak, saya sudah puas";
+                        appendMessage(satisfiedMessage, 'message');
+                    }
                 } catch (error) {
                     alert(`Gagal mengirim pesan: ${error.message}`);
                 }
+            } else if (message && finish) {
+                if (message != 1 && message != 2) {
+                    alert("Masukkan hanya angka 1 atau 2.");
+                    messageInput.value = '';
+                    return;
+                }
+                let userReply = (message == 1) ? 'Ya' : 'Tidak';
+                appendMessage(userReply, 'user-choice');
+                if (message == 1) {
+                    finish = false;
+                    try {
+                        const response = await fetch(url, {
+                            method: "POST",
+                            body: `username:${currentUsername};cat:${category};ques:${question};`
+                        });
 
-            } else {
+                        if (!response.ok) {
+                            throw new Error(`Response status: ${response.status}`);
+                        }
+                        const responseMessage = await response.text();
+                        appendMessage(responseMessage, 'message');
+                        messageInput.value = '';
+                        if (question != 0) {
+                            category = 0;
+                            question = 0;
+                            finish = true;
+                            const satisfiedMessage =
+                                "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
+                                "1. Ya, saya ingin kembali ke menu awal\n" +
+                                "2. Tidak, saya sudah puas dan ingin log out";
+                            appendMessage(satisfiedMessage, 'message');
+                        }
+                    } catch (error) {
+                        alert(`Gagal mengirim pesan: ${error.message}`);
+                    }
+                } else {
+                    logout();
+                }
+            } else if (isNaN(message)) {
+                alert("Masukkan angka saja.");
+            }
+            else {
                 alert('Pesan tidak boleh kosong!');
             }
         }
 
         function logout() {
             currentUsername = null;
+            finish = false;
+            category = 0;
+            question = 0;
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('chatArea').style.display = 'none';
             document.getElementById('output').innerHTML = '';
@@ -201,10 +305,12 @@ Connection: Keep-Alive
         }
 
         function appendMessage(message, type = 'message') {
-            const messageDiv = document.createElement('div');
+            const messageDiv = document.createElement('pre');
+            const lineBreak = document.createElement('hr');
             messageDiv.className = type;
             messageDiv.textContent = message;
             output.appendChild(messageDiv);
+            output.appendChild(lineBreak);
             output.scrollTop = output.scrollHeight;
         }
     </script>
