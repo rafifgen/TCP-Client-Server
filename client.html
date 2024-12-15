@@ -147,6 +147,7 @@ Connection: Keep-Alive
         let currentUsername;
         let finish = false;
         let category = 0, question = 0;
+        const url = "http://localhost:8080";
         const questions = [
             [
                 "Apa itu Metode Pembayaran COD (Bayar di Tempat)?",
@@ -173,6 +174,12 @@ Connection: Keep-Alive
 
             if (username) {
                 currentUsername = username;
+                const reqMessage = `username:${currentUsername};cat:${category};ques:${question};`;
+                const message = await sendPOSTRequest(reqMessage);
+                appendMessage(message, 'message');
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('chatArea').style.display = 'block';
+                document.getElementById('userLabel').textContent = username;
                 try {
                     const url = "http://localhost:8080";
                     const response = await fetch(url, {
@@ -183,11 +190,6 @@ Connection: Keep-Alive
                         throw new Error(`Response status: ${response.status}`);
                     }
 
-                    const message = await response.text();
-                    appendMessage(message, 'message');
-                    document.getElementById('loginForm').style.display = 'none';
-                    document.getElementById('chatArea').style.display = 'block';
-                    document.getElementById('userLabel').textContent = username;
                 } catch (error) {
                     alert(`Gagal menghubungkan: ${error.message}`);
                 }
@@ -201,96 +203,103 @@ Connection: Keep-Alive
             const message = Number(messageInput.value.trim());
             const url = "http://localhost:8080";
             if (message && !finish) {
-                if (message != 1 && message != 2 && message != 3) {
-                    alert("Masukkan hanya angka 1, 2, atau 3.");
-                    messageInput.value = '';
-                    return;
-                }
-                if (category == 0) {
-                    let userReply;
-                    if (message == 1) {
-                        userReply = 'Pembayaran';
-                    } else if (message == 2) {
-                        userReply = 'Pesanan dan Pengiriman';
-                    } else {
-                        userReply = 'Pengembalian Dana';
-                    }
-                    category = message;
-                    appendMessage(userReply, 'user-choice');
-                } else {
-                    question = message;
-                    let userReply = questions[category - 1][question - 1];
-                    appendMessage(userReply, 'user-choice');
-                }
-                try {
-                    const response = await fetch(url, {
-                        method: "POST",
-                        body: `username:${currentUsername};cat:${category};ques:${question};`
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`Response status: ${response.status}`);
-                    }
-                    const responseMessage = await response.text();
-                    appendMessage(responseMessage, 'message');
-                    messageInput.value = '';
-                    if (question != 0) {
-                        category = 0;
-                        question = 0;
-                        finish = true;
-                        const satisfiedMessage =
-                            "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
-                            "1. Ya, saya ingin kembali ke menu awal\n" +
-                            "2. Tidak, saya sudah puas";
-                        appendMessage(satisfiedMessage, 'message');
-                    }
-                } catch (error) {
-                    alert(`Gagal mengirim pesan: ${error.message}`);
-                }
+                handleCatOrQues(message);
             } else if (message && finish) {
-                if (message != 1 && message != 2) {
-                    alert("Masukkan hanya angka 1 atau 2.");
-                    messageInput.value = '';
-                    return;
-                }
-                let userReply = (message == 1) ? 'Ya' : 'Tidak';
-                appendMessage(userReply, 'user-choice');
-                if (message == 1) {
-                    finish = false;
-                    try {
-                        const response = await fetch(url, {
-                            method: "POST",
-                            body: `username:${currentUsername};cat:${category};ques:${question};`
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`Response status: ${response.status}`);
-                        }
-                        const responseMessage = await response.text();
-                        appendMessage(responseMessage, 'message');
-                        messageInput.value = '';
-                        if (question != 0) {
-                            category = 0;
-                            question = 0;
-                            finish = true;
-                            const satisfiedMessage =
-                                "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
-                                "1. Ya, saya ingin kembali ke menu awal\n" +
-                                "2. Tidak, saya sudah puas dan ingin log out";
-                            appendMessage(satisfiedMessage, 'message');
-                        }
-                    } catch (error) {
-                        alert(`Gagal mengirim pesan: ${error.message}`);
-                    }
-                } else {
-                    logout();
-                }
+                handleFinalState(message);
             } else if (isNaN(message)) {
                 alert("Masukkan angka saja.");
             }
             else {
                 alert('Pesan tidak boleh kosong!');
             }
+        }
+
+        async function handleCatOrQues(message) {
+            if (message != 1 && message != 2 && message != 3) {
+                alert("Masukkan hanya angka 1, 2, atau 3.");
+                messageInput.value = '';
+                return;
+            }
+            if (category == 0) {
+                let userReply;
+                if (message == 1) {
+                    userReply = 'Pembayaran';
+                } else if (message == 2) {
+                    userReply = 'Pesanan dan Pengiriman';
+                } else {
+                    userReply = 'Pengembalian Dana';
+                }
+                category = message;
+                appendMessage(userReply, 'user-choice');
+            } else {
+                question = message;
+                let userReply = questions[category - 1][question - 1];
+                appendMessage(userReply, 'user-choice');
+            }
+            const reqMessage = `username:${currentUsername};cat:${category};ques:${question};`;
+            const responseMessage = await sendPOSTRequest(reqMessage);
+            appendMessage(responseMessage, 'message');
+            messageInput.value = '';
+            if (question != 0) {
+                category = 0;
+                question = 0;
+                finish = true;
+                const satisfiedMessage =
+                    "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
+                    "1. Ya, saya ingin kembali ke menu awal\n" +
+                    "2. Tidak, saya sudah puas";
+                appendMessage(satisfiedMessage, 'message');
+            }
+        }
+
+        async function handleFinalState(message) {
+            let userReply;
+            if (message != 1 && message != 2) {
+                alert("Masukkan hanya angka 1 atau 2.");
+                messageInput.value = '';
+                return;
+            }
+            userReply = (message == 1) ? 'Ya' : 'Tidak';
+            appendMessage(userReply, 'user-choice');
+            if (message == 1) {
+                finish = false;
+                const reqMessage = `username:${currentUsername};cat:${category};ques:${question};`;
+                const responseMessage = await sendPOSTRequest(reqMessage);
+                appendMessage(responseMessage, 'message');
+                messageInput.value = '';
+                if (question != 0) {
+                    category = 0;
+                    question = 0;
+                    finish = true;
+                    const satisfiedMessage =
+                        "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
+                        "1. Ya, saya ingin kembali ke menu awal\n" +
+                        "2. Tidak, saya sudah puas dan ingin log out";
+                    appendMessage(satisfiedMessage, 'message');
+                }
+            } else {
+                logout();
+            }
+        }
+
+        async function sendPOSTRequest(message) {
+            const url = "http://localhost:8080";
+            let responseMessage;
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    body: message
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+                responseMessage = await response.text();
+            } catch (error) {
+                alert(`Gagal mengirim pesan: ${error.message}`);
+            }
+
+            return responseMessage;
         }
 
         function logout() {

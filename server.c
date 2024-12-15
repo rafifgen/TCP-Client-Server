@@ -33,21 +33,21 @@ char dana_questions[300] = {
     "3. Bagaimana cara melacak lokasi barang yang dikembalikan ke Penjual?"
 };
 
-char pembayaran_answers[3][1500] = { \
+char pembayaran_answers[3][1500] = {
     /* PESAN PERTAMA PEMBAYARAN */
     "COD (Bayar di Tempat) adalah metode pembayaran tunai yang dilakukan secara\n"
     "langsung di tempat, setelah pesanan dari Kurir diterima oleh Pembeli.\n\n"
-    \
+
     "Metode pembayaran COD (Bayar di Tempat) berlaku tanpa min. pembelian\n"
     "dengan ketentuan sebagai berikut:\n\n"
-    \
+
     "Maks. pembelian Rp5.000.000/pesanan untuk layanan pengiriman Regular dan Hemat.\n"
     "Maks. pembelian Rp500.000/pesanan untuk layanan pengiriman Instant.\n\n"
-    \
+
     "Untuk metode pembayaran COD (Bayar di Tempat), tidak ada biaya yang dikenakan\n"
     "ke Penjual. Biaya penanganan yang berlaku untuk seluruh Pengguna Snowee\n"
     "dengan ketentuan berikut:\n\n"
-    \
+
     "1. Untuk pesanan COD (Bayar di Tempat) pertama s/d ke-3 kali akan dikenakan\n"
     "    biaya penanganan sebesar 0%.\n"
     "2. Untuk pesanan COD (Bayar di Tempat) ke-4 dan seterusnya akan dikenakan\n"
@@ -60,26 +60,26 @@ char pembayaran_answers[3][1500] = { \
     "    pesanan normal, maka seluruh pesanannya akan dikenakan biaya penanganan sebesar 10%.\n"
     "5. Pengguna yang teridentifikasi menggunakan browser Komputer/Handphone saat melakukan\n"
     "    checkout dikenakan biaya penanganan sebesar 10%.",
-    \
+
     /* PESAN KEDUA PEMBAYARAN */
     "Setelah checkout pesanan berhasil, Anda harus melakukan pembayaran dalam batas\n"
     "waktu yang telah ditentukan untuk menyelesaikan pesanan Anda. Batas waktu ini\n"
     "tergantung pada metode pembayaran yang Anda pilih:\n\n"
-    \
+
     "- SnoweePay dan SPayLater: 1 (satu) jam setelah checkout.\n"
     "- Kartu kredit, debit online/kartu kredit, dan OneKlik: 3 (tiga) jam setelah checkout.\n"
     "- Virtual Account, Indomaret, dan Alfamart: 1x24 jam setelah checkout.",
-    \
+
     /* PESAN KETIGA PEMBAYARAN */
     "Anda dapat mengubah metode pembayaran kapan saja sebelum pembayaran berhasil\n"
     "diproses oleh Snowee.\n\n"
-    \
+
     "Pembayaran yang belum diselesaikan dapat ditemukan di halaman Pembelian Saya.\n"
     "Untuk mengubah metode pembayaran, buka halaman Saya > Belum Bayar > Ubah Metode\n"
     "Pembayaran > pilih metode pembayaran yang tersedia > lalu pilih Konfirmasi.\n\n"
-    \
+
     "Anda harus melakukan pembayaran pada tanggal yang ditentukan di halaman Pembelian Saya.\n\n"
-    \
+
     "Jika Anda tidak menemukan pesanan pada halaman Belum Bayar, maka pembayaran Anda\n"
     "telah berhasil diproses dengan metode yang telah dipilih sebelumnya."
 };
