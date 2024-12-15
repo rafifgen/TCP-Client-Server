@@ -150,8 +150,7 @@ Connection: Keep-Alive
         const questions = [
             [
                 "Apa itu Metode Pembayaran COD (Bayar di Tempat)?",
-                "Apa yang terjadi jika saya tidak membayar pesanan\n" +
-                "setelah batas waktu pembayaran berakhir?",
+                "Apa yang terjadi jika saya tidak membayar pesanan\nsetelah batas waktu pembayaran berakhir?",
                 "Apakah saya dapat mengubah metode pembayaran saya?"
             ],
             [
@@ -164,140 +163,111 @@ Connection: Keep-Alive
                 "Bagaimana proses pengembalian dana untuk pesanan yang dibatalkan?",
                 "Bagaimana cara melacak lokasi barang yang dikembalikan ke Penjual?"
             ]
-        ]
+        ];
         const output = document.getElementById('output');
 
+        // Main Functions
         async function setUsername() {
             const usernameInput = document.getElementById('usernameInput');
             const username = usernameInput.value.trim();
 
-            if (username) {
-                currentUsername = username;
-                try {
-                    const url = "http://localhost:8080";
-                    const response = await fetch(url, {
-                        method: "POST",
-                        body: `username:${username}`
-                    });
-                    if (!response.ok) {
-                        throw new Error(`Response status: ${response.status}`);
-                    }
+            if (!validateUsername(username)) return;
 
-                    const message = await response.text();
-                    appendMessage(message, 'message');
-                    document.getElementById('loginForm').style.display = 'none';
-                    document.getElementById('chatArea').style.display = 'block';
-                    document.getElementById('userLabel').textContent = username;
-                } catch (error) {
-                    alert(`Gagal menghubungkan: ${error.message}`);
-                }
-            } else {
-                alert('Username tidak boleh kosong!');
+            try {
+                const message = await initialize(username);
+                currentUsername = username;
+                displayChatArea(username, message);
+            } catch (error) {
+                alert(`Gagal menghubungkan: ${error.message}`);
             }
         }
 
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = Number(messageInput.value.trim());
-            const url = "http://localhost:8080";
-            if (message && !finish) {
-                if (message != 1 && message != 2 && message != 3) {
-                    alert("Masukkan hanya angka 1, 2, atau 3.");
-                    messageInput.value = '';
-                    return;
-                }
-                if (category == 0) {
-                    let userReply;
-                    if (message == 1) {
-                        userReply = 'Pembayaran';
-                    } else if (message == 2) {
-                        userReply = 'Pesanan dan Pengiriman';
-                    } else {
-                        userReply = 'Pengembalian Dana';
-                    }
-                    category = message;
-                    appendMessage(userReply, 'user-choice');
-                } else {
-                    question = message;
-                    let userReply = questions[category - 1][question - 1];
-                    appendMessage(userReply, 'user-choice');
-                }
-                try {
-                    const response = await fetch(url, {
-                        method: "POST",
-                        body: `username:${currentUsername};cat:${category};ques:${question};`
-                    });
 
-                    if (!response.ok) {
-                        throw new Error(`Response status: ${response.status}`);
-                    }
-                    const responseMessage = await response.text();
-                    appendMessage(responseMessage, 'message');
-                    messageInput.value = '';
-                    if (question != 0) {
-                        category = 0;
-                        question = 0;
-                        finish = true;
-                        const satisfiedMessage =
-                            "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
-                            "1. Ya, saya ingin kembali ke menu awal\n" +
-                            "2. Tidak, saya sudah puas";
-                        appendMessage(satisfiedMessage, 'message');
-                    }
-                } catch (error) {
-                    alert(`Gagal mengirim pesan: ${error.message}`);
-                }
-            } else if (message && finish) {
-                if (message != 1 && message != 2) {
-                    alert("Masukkan hanya angka 1 atau 2.");
-                    messageInput.value = '';
-                    return;
-                }
-                let userReply = (message == 1) ? 'Ya' : 'Tidak';
-                appendMessage(userReply, 'user-choice');
-                if (message == 1) {
-                    finish = false;
-                    try {
-                        const response = await fetch(url, {
-                            method: "POST",
-                            body: `username:${currentUsername};cat:${category};ques:${question};`
-                        });
+            if (!validateMessage(message)) return;
 
-                        if (!response.ok) {
-                            throw new Error(`Response status: ${response.status}`);
-                        }
-                        const responseMessage = await response.text();
-                        appendMessage(responseMessage, 'message');
-                        messageInput.value = '';
-                        if (question != 0) {
-                            category = 0;
-                            question = 0;
-                            finish = true;
-                            const satisfiedMessage =
-                                "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
-                                "1. Ya, saya ingin kembali ke menu awal\n" +
-                                "2. Tidak, saya sudah puas dan ingin log out";
-                            appendMessage(satisfiedMessage, 'message');
-                        }
-                    } catch (error) {
-                        alert(`Gagal mengirim pesan: ${error.message}`);
-                    }
+            try {
+                if (!finish) {
+                    handleCategoryOrQuestion(message);
                 } else {
-                    logout();
+                    await handleFinishState(message);
                 }
-            } else if (isNaN(message)) {
-                alert("Masukkan angka saja.");
-            }
-            else {
-                alert('Pesan tidak boleh kosong!');
+            } catch (error) {
+                alert(`Gagal mengirim pesan: ${error.message}`);
+            } finally {
+                messageInput.value = '';
             }
         }
 
         function logout() {
+            resetChatState();
+            displayLoginArea();
+        }
+
+        // Helper Functions
+        function validateUsername(username) {
+            if (!username) {
+                alert('Username tidak boleh kosong!');
+                return false;
+            }
+            return true;
+        }
+
+        function validateMessage(message) {
+            if (isNaN(message) || message === '') {
+                alert('Masukkan angka saja.');
+                return false;
+            }
+            return true;
+        }
+
+        async function initialize(username) {
+            const url = "http://localhost:8080";
+            const response = await fetch(url, {
+                method: "POST",
+                body: `username:${username};cat:0;ques:0;`
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            return await response.text();
+        }
+
+        async function sendUserInteractionToServer(username, category, question) {
+            const url = "http://localhost:8080";
+            const body = `username:${username};cat:${category};ques:${question};`;
+
+            const response = await fetch(url, {
+                method: "POST",
+                body
+            });
+
+            if (!response.ok) {
+                throw new Error(`Response status: ${response.status}`);
+            }
+
+            return await response.text();
+        }
+
+        function displayChatArea(username, message) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('chatArea').style.display = 'block';
+            document.getElementById('userLabel').textContent = username;
+            appendMessage(message, 'message');
+        }
+
+        function resetChatState() {
             currentUsername = null;
             finish = false;
             category = 0;
             question = 0;
+        }
+
+        function displayLoginArea() {
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('chatArea').style.display = 'none';
             document.getElementById('output').innerHTML = '';
@@ -312,6 +282,62 @@ Connection: Keep-Alive
             output.appendChild(messageDiv);
             output.appendChild(lineBreak);
             output.scrollTop = output.scrollHeight;
+        }
+
+        function handleCategoryOrQuestion(message) {
+            if (category === 0) {
+                category = message;
+                appendMessage(getCategoryLabel(message), 'user-choice');
+
+                // Fetch request setelah kategori dipilih
+                sendUserInteractionToServer(currentUsername, category, question)
+                    .then((response) => appendMessage(response, 'message'))
+                    .catch((error) => alert(`Gagal memproses kategori: ${error.message}`));
+            } else {
+                question = message;
+                appendMessage(getQuestion(category, question), 'user-choice');
+                sendUserInteractionToServer(currentUsername, category, question)
+                    .then((response) => {
+                        appendMessage(response, 'message');
+                        appendMessage(getSatisfiedPrompt(), 'message');
+                    })
+                    .catch((error) => alert(`Gagal memproses kategori: ${error.message}`));
+                finish = true;
+            }
+        }
+
+        async function handleFinishState(message) {
+            const userReply = message === 1 ? 'Ya' : 'Tidak';
+            appendMessage(userReply, 'user-choice');
+
+            if (message === 1) {
+                // Reset state dan kembali ke menu awal tanpa request ke server
+                finish = false;
+                category = 0;
+                question = 0;
+                const response = await initialize(currentUsername);
+                appendMessage(response);
+            } else {
+                // Tutup sesi dengan logout
+                logout();
+            }
+        }
+
+        function getCategoryLabel(category) {
+            const labels = ['Pembayaran', 'Pesanan dan Pengiriman', 'Pengembalian Dana'];
+            return labels[category - 1];
+        }
+
+        function getSatisfiedPrompt() {
+            return (
+                "Apakah Anda sudah puas dengan ini atau ingin kembali ke menu Awal?\n" +
+                "1. Ya, saya ingin kembali ke menu awal\n" +
+                "2. Tidak, saya sudah puas"
+            );
+        }
+
+        function getQuestion(cat, idx) {
+            return questions[cat - 1][idx - 1];
         }
     </script>
 </body>
